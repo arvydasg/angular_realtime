@@ -99,3 +99,60 @@ ng serve
 ```
 
 Open your browser and navigate to http://localhost:4200/. You should see the real-time display of the current time.
+
+### Dockerize the application
+
+Make sure docker is installed on your machine by:
+
+```bash
+docker --version
+```
+
+Create dockerfile
+```bash
+touch Dockerfile
+```
+
+Add this content to it:
+```bash
+# Stage 1: Compile and Build angular codebase
+
+# Use official node image as the base image
+FROM node:latest as build
+# Set the working directory
+WORKDIR /usr/local/app
+# Add the source code to app
+COPY ./ /usr/local/app/
+# Install all the dependencies
+RUN npm install
+# Generate the build of the application
+RUN npm run build
+
+# Stage 2: Serve app with nginx server
+
+# Use official nginx image as the base image
+FROM nginx:latest
+# Copy the build output to replace the default nginx contents.
+COPY --from=build /usr/local/app/dist/project /usr/share/nginx/html
+# Expose port 80
+EXPOSE 80
+```
+
+Build the docker image(while at the same location as the docker file)
+```bash
+docker build -t angular_realtime .
+```
+
+After the build is done you should see the image in your Docker Desktop app or by doing this command:
+
+```bash
+docker ps
+```
+
+To containerize the docker image and run it, do this command:
+
+```bash
+docker run -p 8080:80 angular_realtime
+```
+
+Open http://localhost:8080/ and you should see the app running.
